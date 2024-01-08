@@ -11,7 +11,14 @@ class AccountMonitor(
     private val logger = LoggerFactory.getLogger(AccountMonitor::class.java)
 
     fun checkAccount() {
-        val accountInfo = binanceClient.accountInfo()
+        val accountInfoResult = attempt { binanceClient.accountInfo() }
+        val error = accountInfoResult.exceptionOrNull()
+        if (error != null) {
+            logger.error("Error: ${error.message}", error)
+            telegram?.sendMessage("SS won't stop but there is an error: $error")
+            return
+        }
+        val accountInfo = accountInfoResult.getOrThrow()
         val profit = accountInfo.totalUnrealizedProfit.toDouble() / accountInfo.totalBalance.toDouble()
         logger.info("Profit: $profit")
         if (profit <= warningThreshold) {

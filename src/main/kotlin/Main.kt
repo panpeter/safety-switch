@@ -9,6 +9,13 @@ import kotlin.time.Duration.Companion.seconds
 
 fun main() {
     val telegram = getTelegram()
+
+    Runtime.getRuntime().addShutdownHook(object : Thread() {
+        override fun run() {
+            telegram.sendMessage("Safety Switch stops")
+        }
+    })
+
     runBlocking {
         val logger = LoggerFactory.getLogger("Main")
         telegram.sendMessage("Safety Switch starts")
@@ -35,7 +42,6 @@ fun main() {
             }
         }
     }
-    telegram.sendMessage("Safety Switch stops")
 }
 
 private fun getBinanceClient(): BinanceFuturesClient {
